@@ -2,6 +2,8 @@
 import React, { useState } from 'react';
 import AgentCard from '../components/AgentCard.jsx';
 import ChatWindow from '../components/ChatWindow.jsx';
+import TicketForm from '../components/TicketForm.jsx';
+import { submitTicket } from '../lib/api/tickets';
 import { useChat } from '../contexts/ChatContext.jsx';
 import botIcon from '../assets/svg-ai-agent-bot-icon.svg';
 import featureIcon from '../assets/vector.svg';
@@ -159,9 +161,25 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Display either ChatWindow or TicketForm based on agent type */}
       {openAgent && (
         <div className="fixed bottom-5 right-5 z-50 w-full max-w-[380px] md:max-w-[420px] animate-[fadeIn_.2s_ease-out]">
-          <ChatWindow agentType={openAgent} onClose={handleClose} />
+          {openAgent === 'technical' ? (
+            <TicketForm 
+              onClose={handleClose}
+              onSubmit={async (data) => {
+                try {
+                  const response = await submitTicket(data);
+                  return response; // Return the response to show the ticket ID
+                } catch (error) {
+                  console.error('Failed to submit ticket:', error);
+                  throw error; // Re-throw to show error in the form
+                }
+              }}
+            />
+          ) : (
+            <ChatWindow agentType={openAgent} onClose={handleClose} />
+          )}
         </div>
       )}
     </div>

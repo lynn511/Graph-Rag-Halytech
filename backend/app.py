@@ -2,8 +2,9 @@ from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from typing import List, Dict, Optional
 import os
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 from rag import RAGSystem
+from tickets import TicketManager
 
 app = FastAPI()
 
@@ -16,8 +17,22 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Initialize RAG system
+# Initialize systems
 rag_system = RAGSystem(data_path="data/docs/")
+ticket_manager = TicketManager()
+
+class TicketRequest(BaseModel):
+    fullName: str
+    email: EmailStr
+    company: Optional[str] = None
+    title: str
+    description: str
+    urgency: str
+
+class TicketResponse(BaseModel):
+    ticketId: str
+    status: str
+    message: str
 
 class ChatRequest(BaseModel):
     userId: str
@@ -90,14 +105,31 @@ async def chat_knowledge(request: ChatRequest) -> ChatResponse:
 #     except Exception as e:
 #         raise HTTPException(status_code=500, detail=f"Error processing document: {str(e)}")
 
-# @app.get("/api/knowledge/health")
-# async def health_check():
-#     """
-#     Check if the RAG system is operational
-#     """
-#     try:
-#         # Try a simple query to verify system is working
-#         result = rag_system.query("test query", top_k=1)
-#         return {"status": "healthy", "collection_size": rag_system.collection.count()}
-#     except Exception as e:
-#         raise HTTPException(status_code=500, detail=f"System unhealthy: {str(e)}")
+# Ticket endpoints
+@app.post("/api/tickets")
+async def create_ticket(request: TicketRequest) -> TicketResponse:
+    """
+    Create a new support ticket
+    """
+    try:
+        # Create the ticket
+        ticket_data = request.model_dump()
+        ticket_id = ticket_manager.create_ticket(ticket_data)
+        
+        return TicketResponse(
+            ticketId=ticket_id,
+            status="created",
+            message="Ticket created successfully"
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error creating ticket: {str(e)}")
+
+@app.get("/api/tickets/{ticket_id}")
+async def get_ticket(ticket_id: str):
+    """
+    Get ticket details by ID
+    """
+    ticket = ticket_manager.get_ticket(ticket_id)
+    if not ticket:
+        raise HTTPException(status_code=404, detail="Ticket not found")
+    return ticket
