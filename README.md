@@ -1,8 +1,7 @@
-AI Marketing Project – HALY TECH
+HALY TECH – AI Marketing Project
 Overview
 
-This project is an AI-powered marketing assistant designed to help businesses access information quickly, improve customer engagement, and streamline product-related queries.
-It uses a Retrieval-Augmented Generation (RAG) workflow to answer questions based on uploaded documents.
+This project is an AI-powered marketing assistant that helps businesses access information quickly, improve customer engagement, and streamline product-related queries. It uses a Retrieval-Augmented Generation (RAG) workflow to answer user questions based on uploaded documents.
 
 Features
 
@@ -19,48 +18,49 @@ Automated workflow components built with n8n
 Tech Stack
 
 Backend: FastAPI, Python, LangChain
-
 AI Models: OpenAI embeddings and LLMs
-
 Vector Store: ChromaDB
-
 Orchestration: n8n
-
 Frontend: Vite + Tailwind
-
-Tools: Copilot for code generation support
+Tools: GitHub Copilot
 
 How It Works
 
-Upload documents through the interface.
+Users upload documents through the interface.
 
 Documents are embedded and stored in ChromaDB.
 
-User queries are processed through the RAG pipeline.
+Queries pass through the RAG pipeline.
 
 The system retrieves relevant context and generates accurate responses.
 
 Project Structure
-
-backend/ – API, RAG pipeline, document processing
-
-frontend/ – User interface
-
-workflows/ – n8n automation flows
-
-docs/ – Project documentation and slides
+backend/        # API, RAG pipeline, document processing
+frontend/       # User interface
+workflows/      # n8n automation flows
+docs/           # Project documents and slides
 
 Setup Instructions
+1. Clone the repository
+git clone https://github.com/Hadicheayto/ai-marketing-project.git
+cd ai-marketing-project
 
-Clone the repository.
+2. Backend setup
 
-Install dependencies (backend and frontend).
+Install backend dependencies and run the API:
 
-Run the backend server (FastAPI).
+cd backend
+pip install -r requirements.txt
+uvicorn main:app --reload
 
-Run the frontend application.
+3. Frontend setup
+cd frontend
+npm install
+npm run dev
 
-Optional: configure n8n workflows.
+4. Optional: configure n8n workflows
+
+Refer to the files in workflows/.
 
 Use Cases
 
