@@ -1,0 +1,11 @@
+fastapi
+uvicorn
+python-multipart
+PyMuPDF
+langchain
+chromadb
+sentence-transformers
+openai
+pydantic
+python-dotenv
+pydantic[email]

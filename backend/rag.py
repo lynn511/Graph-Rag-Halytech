@@ -21,7 +21,7 @@ class RAGSystem:
     def setup_text_splitter(self):
         """Initialize the text splitter for chunking documents"""
         self.splitter = RecursiveCharacterTextSplitter(
-            chunk_size=1000,
+            chunk_size=750,
             chunk_overlap=200,
             length_function=len
         )

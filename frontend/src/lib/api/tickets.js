@@ -25,7 +25,7 @@ export const submitTicket = async (ticketData) => {
     };
 
     await axios.post(
-      'http://localhost:5678/webhook-test/ddd3d13a-3a44-44bf-b7bc-5da41f56e942',
+      'http://localhost:5678/webhook/ddd3d13a-3a44-44bf-b7bc-5da41f56e942',
       webhookData
     );
   } catch (webhookError) {

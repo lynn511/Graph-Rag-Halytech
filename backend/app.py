@@ -79,31 +79,7 @@ async def chat_knowledge(request: ChatRequest) -> ChatResponse:
         suggested_replies=suggested_replies
     )
 
-# @app.post("/api/knowledge/upload")
-# async def upload_document(file: UploadFile = File(...)):
-#     """
-#     Upload and process a new document for the knowledge base
-#     """
-#     if not file.filename.endswith('.pdf'):
-#         raise HTTPException(status_code=400, detail="Only PDF files are supported")
-    
-#     try:
-#         # Create docs directory if it doesn't exist
-#         os.makedirs("data/docs", exist_ok=True)
-        
-#         # Save the uploaded file
-#         file_path = os.path.join("data/docs", file.filename)
-#         with open(file_path, "wb") as buffer:
-#             content = await file.read()
-#             buffer.write(content)
-        
-#         # Add document to RAG system
-#         result = rag_system.add_document(file_path)
-        
-#         return {"message": f"Document processed successfully: {result}"}
-    
-#     except Exception as e:
-#         raise HTTPException(status_code=500, detail=f"Error processing document: {str(e)}")
+
 
 # Ticket endpoints
 @app.post("/api/tickets")
