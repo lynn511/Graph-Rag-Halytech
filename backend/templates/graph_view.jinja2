@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Knowledge Graph Viewer</title>
+    <script src="https://unpkg.com/cytoscape/dist/cytoscape.min.js"></script>
+    <script src="https://unpkg.com/cytoscape-cose-bilkent/cytoscape-cose-bilkent.js"></script>
+    <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0f0f23;
+            color: #e0e0e0;
+        }
+        #container {
+            display: flex;
+            height: 100vh;
+        }
+        #sidebar {
+            width: 300px;
+            background: #1a1a2e;
+            padding: 20px;
+            overflow-y: auto;
+            border-right: 1px solid #2d2d44;
+        }
+        #cy {
+            flex: 1;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 100%);
+        }
+        h1 {
+            font-size: 20px;
+            margin-bottom: 20px;
+            color: #00d4ff;
+        }
+        .stats {
+            background: #16213e;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #2d2d44;
+        }
+        .stat-item:last-child {
+            border-bottom: none;
+        }
+        .stat-label {
+            color: #a0a0b0;
+            font-size: 13px;
+        }
+        .stat-value {
+            color: #00d4ff;
+            font-weight: 600;
+        }
+        .controls {
+            background: #16213e;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+            background: #00d4ff;
+            color: #0f0f23;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        button:hover {
+            background: #00a8cc;
+            transform: translateY(-2px);
+        }
+        .search {
+            width: 100%;
+            padding: 10px;
+            background: #0f0f23;
+            border: 1px solid #2d2d44;
+            border-radius: 6px;
+            color: #e0e0e0;
+            margin-bottom: 10px;
+        }
+        .search:focus {
+            outline: none;
+            border-color: #00d4ff;
+        }
+        #nodeInfo {
+            background: #16213e;
+            padding: 15px;
+            border-radius: 8px;
+            display: none;
+        }
+        #nodeInfo h3 {
+            color: #00d4ff;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+        #nodeInfo p {
+            margin: 5px 0;
+            font-size: 13px;
+            color: #c0c0d0;
+        }
+        .legend {
+            background: #16213e;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin: 8px 0;
+            font-size: 13px;
+        }
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <div id="sidebar">
+            <h1>📊 Knowledge Graph</h1>
+            
+            <div class="stats">
+                <div class="stat-item">
+                    <span class="stat-label">Nodes</span>
+                    <span class="stat-value" id="nodeCount">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Edges</span>
+                    <span class="stat-value" id="edgeCount">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Density</span>
+                    <span class="stat-value" id="density">0</span>
+                </div>
+            </div>
+
+            <div class="controls">
+                <input type="text" class="search" id="searchBox" placeholder="Search nodes...">
+                <button onclick="fitGraph()">🔍 Fit Graph</button>
+                <button onclick="resetLayout()">🔄 Reset Layout</button>
+                <button onclick="exportGraph()">💾 Export PNG</button>
+            </div>
+
+            <div id="nodeInfo">
+                <h3>Node Details</h3>
+                <p><strong>ID:</strong> <span id="nodeId"></span></p>
+                <p><strong>Type:</strong> <span id="nodeType"></span></p>
+                <p><strong>Connections:</strong> <span id="nodeConnections"></span></p>
+            </div>
+
+            <div class="legend">
+                <h3 style="margin-bottom: 10px; font-size: 14px;">Node Types</h3>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #00d4ff;"></div>
+                    <span>Company</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #ff6b6b;"></div>
+                    <span>Product</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #4ecdc4;"></div>
+                    <span>Person</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #ffd93d;"></div>
+                    <span>Department</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #a78bfa;"></div>
+                    <span>Other</span>
+                </div>
+            </div>
+        </div>
+
+        <div id="cy"></div>
+    </div>
+
+    <script>
+        // Get elements data from template variable
+        const elements = {{ elements | safe }};
+
+        // Node color mapping
+        const typeColors = {
+            'company': '#00d4ff',
+            'product': '#ff6b6b',
+            'person': '#4ecdc4',
+            'people': '#4ecdc4',
+            'department': '#ffd93d',
+            'project': '#95e1d3',
+            'unknown': '#a78bfa'
+        };
+
+        var cy = cytoscape({
+            container: document.getElementById('cy'),
+            elements: elements,
+            style: [
+                {
+                    selector: 'node',
+                    style: {
+                        'background-color': function(ele) {
+                            const type = ele.data('type') || 'unknown';
+                            return typeColors[type.toLowerCase()] || typeColors['unknown'];
+                        },
+                        'label': 'data(label)',
+                        'color': '#ffffff',
+                        'text-valign': 'center',
+                        'text-halign': 'center',
+                        'font-size': '12px',
+                        'text-outline-color': '#0f0f23',
+                        'text-outline-width': 2,
+                        'width': 'label',
+                        'height': 'label',
+                        'padding': '12px',
+                        'shape': 'roundrectangle',
+                        'border-width': 2,
+                        'border-color': function(ele) {
+                            const type = ele.data('type') || 'unknown';
+                            return typeColors[type.toLowerCase()] || typeColors['unknown'];
+                        },
+                        'border-opacity': 0.5
+                    }
+                },
+                {
+                    selector: 'node:selected',
+                    style: {
+                        'border-width': 4,
+                        'border-color': '#00ff88',
+                        'border-opacity': 1
+                    }
+                },
+                {
+                    selector: 'edge',
+                    style: {
+                        'width': 2,
+                        'line-color': '#4a5568',
+                        'target-arrow-color': '#4a5568',
+                        'target-arrow-shape': 'triangle',
+                        'curve-style': 'bezier',
+                        'arrow-scale': 1.5,
+                        'label': 'data(label)',
+                        'font-size': '10px',
+                        'color': '#a0a0b0',
+                        'text-rotation': 'autorotate',
+                        'text-background-color': '#1a1a2e',
+                        'text-background-opacity': 0.8,
+                        'text-background-padding': '3px'
+                    }
+                },
+                {
+                    selector: 'edge:selected',
+                    style: {
+                        'line-color': '#00ff88',
+                        'target-arrow-color': '#00ff88',
+                        'width': 3
+                    }
+                },
+                {
+                    selector: '.highlighted',
+                    style: {
+                        'background-color': '#00ff88',
+                        'line-color': '#00ff88',
+                        'target-arrow-color': '#00ff88',
+                        'transition-property': 'background-color, line-color, target-arrow-color',
+                        'transition-duration': '0.3s'
+                    }
+                }
+            ],
+            layout: {
+                name: 'cose',
+                animate: true,
+                animationDuration: 1000,
+                nodeRepulsion: 8000,
+                idealEdgeLength: 100,
+                edgeElasticity: 100,
+                nestingFactor: 5,
+                gravity: 80,
+                numIter: 1000,
+                randomize: false
+            }
+        });
+
+        // Update stats
+        document.getElementById('nodeCount').textContent = cy.nodes().length;
+        document.getElementById('edgeCount').textContent = cy.edges().length;
+        const density = cy.edges().length / (cy.nodes().length * (cy.nodes().length - 1) / 2);
+        document.getElementById('density').textContent = (density * 100).toFixed(1) + '%';
+
+        // Node click handler
+        cy.on('tap', 'node', function(evt) {
+            const node = evt.target;
+            const nodeInfo = document.getElementById('nodeInfo');
+            nodeInfo.style.display = 'block';
+            document.getElementById('nodeId').textContent = node.data('id');
+            document.getElementById('nodeType').textContent = node.data('type') || 'unknown';
+            document.getElementById('nodeConnections').textContent = node.degree();
+
+            // Highlight connected nodes
+            cy.elements().removeClass('highlighted');
+            node.neighborhood().addClass('highlighted');
+            node.addClass('highlighted');
+        });
+
+        // Click on background to deselect
+        cy.on('tap', function(evt) {
+            if (evt.target === cy) {
+                cy.elements().removeClass('highlighted');
+                document.getElementById('nodeInfo').style.display = 'none';
+            }
+        });
+
+        // Search functionality
+        document.getElementById('searchBox').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            cy.elements().removeClass('highlighted');
+            
+            if (searchTerm) {
+                const matches = cy.nodes().filter(function(node) {
+                    return node.data('label').toLowerCase().includes(searchTerm);
+                });
+                
+                matches.addClass('highlighted');
+                if (matches.length > 0) {
+                    cy.fit(matches, 50);
+                }
+            }
+        });
+
+        // Control functions
+        function fitGraph() {
+            cy.fit(50);
+            cy.center();
+        }
+
+        function resetLayout() {
+            cy.layout({
+                name: 'cose',
+                animate: true,
+                animationDuration: 1000,
+                randomize: true
+            }).run();
+        }
+
+        function exportGraph() {
+            const png = cy.png({
+                output: 'blob',
+                bg: '#0f0f23',
+                full: true,
+                scale: 2
+            });
+            const url = URL.createObjectURL(png);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'knowledge-graph.png';
+            a.click();
+        }
+
+        // Initial fit
+        setTimeout(() => fitGraph(), 100);
+    </script>
+</body>
+</html>

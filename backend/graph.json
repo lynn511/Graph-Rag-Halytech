@@ -1,0 +1,82 @@
+{
+  "nodes": [
+    {
+      "id": "Halytech",
+      "type": "company"
+    },
+    {
+      "id": "AI systems",
+      "type": "product"
+    },
+    {
+      "id": "Automation & Smart Monitoring",
+      "type": "project"
+    },
+    {
+      "id": "Cloud & IoT Integration",
+      "type": "project"
+    },
+    {
+      "id": "Custom AI Solutions",
+      "type": "project"
+    },
+    {
+      "id": "businesses",
+      "type": "department"
+    },
+    {
+      "id": "AI",
+      "type": "technology"
+    },
+    {
+      "id": "Sydney",
+      "type": "location"
+    },
+    {
+      "id": "Australia",
+      "type": "location"
+    }
+  ],
+  "edges": [
+    {
+      "source": "Halytech",
+      "target": "AI systems",
+      "relation": "builds"
+    },
+    {
+      "source": "Halytech",
+      "target": "Automation & Smart Monitoring",
+      "relation": "offers"
+    },
+    {
+      "source": "Halytech",
+      "target": "Cloud & IoT Integration",
+      "relation": "offers"
+    },
+    {
+      "source": "Halytech",
+      "target": "Custom AI Solutions",
+      "relation": "offers"
+    },
+    {
+      "source": "Halytech",
+      "target": "businesses",
+      "relation": "helps"
+    },
+    {
+      "source": "Halytech",
+      "target": "AI",
+      "relation": "develops"
+    },
+    {
+      "source": "Halytech",
+      "target": "Sydney",
+      "relation": "headquarters"
+    },
+    {
+      "source": "Sydney",
+      "target": "Australia",
+      "relation": "located in"
+    }
+  ]
+}
