@@ -5,6 +5,12 @@ import os
 from pydantic import BaseModel, EmailStr
 from rag import RAGSystem
 from tickets import TicketManager
+from fastapi.responses import HTMLResponse
+import pickle
+
+from fastapi.templating import Jinja2Templates
+
+templates = Jinja2Templates(directory="templates")
 
 app = FastAPI()
 
@@ -133,3 +139,49 @@ async def get_ticket(ticket_id: str):
     if not ticket:
         raise HTTPException(status_code=404, detail="Ticket not found")
     return ticket
+
+
+@app.get("/graph")
+def get_graph():
+    import pickle
+    with open("data/graph.pkl", "rb") as f:
+        g = pickle.load(f)
+    return {
+        "nodes": list(g.nodes()),
+        "edges": list(g.edges())
+    }
+
+
+from fastapi.templating import Jinja2Templates
+from starlette.requests import Request
+
+templates = Jinja2Templates(directory="templates")
+
+@app.get("/graph-view", response_class=HTMLResponse)
+def graph_view(request: Request):
+    with open("data/graph.pkl", "rb") as f:
+        g = pickle.load(f)
+
+    elements = []
+    for node_id, attrs in g.nodes(data=True):
+        elements.append({
+            "data": {
+                "id": str(node_id),
+                "label": str(node_id),
+                "type": attrs.get('type', 'unknown')
+            }
+        })
+
+    for u, v, attrs in g.edges(data=True):
+        elements.append({
+            "data": {
+                "source": str(u),
+                "target": str(v),
+                "label": attrs.get('relation', '')
+            }
+        })
+
+    return templates.TemplateResponse("graph_view.jinja2", {
+        "request": request,
+        "elements": elements
+    })
