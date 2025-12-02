@@ -1,4 +1,4 @@
-# AI Marketing Project – HALY TECH
+# HALY TECH
 
 ## Overview
 
@@ -39,6 +39,7 @@ npm run dev
 
 
 ## How It Works
+### V1: RAG version
 
 ```mermaid
 graph TD
@@ -48,7 +49,7 @@ graph TD
     D --> E[Retrieve Relevant Context]
     E --> F[AI Response<br/>RAG Pipeline]
 ```
-### Latest Addition: GraphRAG
+### V2: Latest Addition, GraphRAG
 
 The system has been extended with a graph-enhanced RAG architecture to improve retrieval accuracy and reduce hallucinations. Instead of relying solely on vector similarity, uploaded documents are parsed into structured entities and relationships that form a domain-specific Knowledge Graph. This allows the assistant to understand how concepts connect across your marketing materials, leading to more precise and context-aware answers. 
 ```mermaid
