@@ -1,0 +1,450 @@
+{
+    "name": "Customer support for marketing",
+    "nodes": [
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "ddd3d13a-3a44-44bf-b7bc-5da41f56e942",
+                "options": {}
+            },
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 2.1,
+            "position": [
+                -256,
+                32
+            ],
+            "id": "d356b82a-2ccb-4091-a20c-121eebaf3950",
+            "name": "Webhook",
+            "webhookId": "ddd3d13a-3a44-44bf-b7bc-5da41f56e942"
+        },
+        {
+            "parameters": {
+                "modelId": {
+                    "__rl": true,
+                    "value": "chatgpt-4o-latest",
+                    "mode": "list",
+                    "cachedResultName": "CHATGPT-4O-LATEST"
+                },
+                "messages": {
+                    "values": [
+                        {
+                            "content": "=i received this message from the customer support portal,\ntitle: {{ $('Webhook').item.json.body.ticketDetails.title }}\nDescription:{{ $('Webhook').item.json.body.ticketDetails.description }}\nfullname:{{ $('Webhook').item.json.body.userInfo.fullName }}\nemail:{{ $('Webhook').item.json.body.userInfo.email }}\nPlease write an email that provide a solution to this message for the user to test.\ndon't make it long.\nour contact info are:\nhalytech.info@gmail.com\nhalytech.customersupport@gmail.com"
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "type": "@n8n/n8n-nodes-langchain.openAi",
+            "typeVersion": 1.8,
+            "position": [
+                368,
+                -240
+            ],
+            "id": "391bb41e-cb0e-4bc6-a092-e0b918f84acb",
+            "name": "Message a model"
+        },
+        {
+            "parameters": {
+                "sendTo": "hadi.ch.2003@gmail.com",
+                "subject": "={{ $json.subject }}",
+                "emailType": "text",
+                "message": "={{ $json.body }}",
+                "options": {}
+            },
+            "type": "n8n-nodes-base.gmail",
+            "typeVersion": 2.1,
+            "position": [
+                960,
+                -240
+            ],
+            "id": "56580d0e-a97b-46d5-bfda-31cf77da3c36",
+            "name": "Send a message",
+            "webhookId": "5a730b6b-13c6-4897-bea9-d021d782a29a"
+        },
+        {
+            "parameters": {
+                "rules": {
+                    "values": [
+                        {
+                            "conditions": {
+                                "options": {
+                                    "caseSensitive": true,
+                                    "leftValue": "",
+                                    "typeValidation": "strict",
+                                    "version": 2
+                                },
+                                "conditions": [
+                                    {
+                                        "leftValue": "={{ $json.body.ticketDetails.urgency }}",
+                                        "rightValue": "low",
+                                        "operator": {
+                                            "type": "string",
+                                            "operation": "equals"
+                                        },
+                                        "id": "f4dc4a75-2d07-4220-9a60-6beb437d08e9"
+                                    }
+                                ],
+                                "combinator": "and"
+                            },
+                            "renameOutput": true,
+                            "outputKey": "low"
+                        },
+                        {
+                            "conditions": {
+                                "options": {
+                                    "caseSensitive": true,
+                                    "leftValue": "",
+                                    "typeValidation": "strict",
+                                    "version": 2
+                                },
+                                "conditions": [
+                                    {
+                                        "id": "ffbdac85-77ec-4834-a774-5dfa2f3973b5",
+                                        "leftValue": "={{ $json.body.ticketDetails.urgency }}",
+                                        "rightValue": "medium",
+                                        "operator": {
+                                            "type": "string",
+                                            "operation": "equals",
+                                            "name": "filter.operator.equals"
+                                        }
+                                    }
+                                ],
+                                "combinator": "and"
+                            },
+                            "renameOutput": true,
+                            "outputKey": "medium"
+                        },
+                        {
+                            "conditions": {
+                                "options": {
+                                    "caseSensitive": true,
+                                    "leftValue": "",
+                                    "typeValidation": "strict",
+                                    "version": 2
+                                },
+                                "conditions": [
+                                    {
+                                        "id": "b28df7b9-7781-42cc-84f6-742bf52ca088",
+                                        "leftValue": "={{ $json.body.ticketDetails.urgency }}",
+                                        "rightValue": "high",
+                                        "operator": {
+                                            "type": "string",
+                                            "operation": "equals",
+                                            "name": "filter.operator.equals"
+                                        }
+                                    }
+                                ],
+                                "combinator": "and"
+                            },
+                            "renameOutput": true,
+                            "outputKey": "High"
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "type": "n8n-nodes-base.switch",
+            "typeVersion": 3.2,
+            "position": [
+                80,
+                16
+            ],
+            "id": "dcf607bb-ab51-414f-b329-93ec6d47f182",
+            "name": "Switch"
+        },
+        {
+            "parameters": {
+                "calendar": {
+                    "__rl": true,
+                    "value": "hadi.ch.2003@gmail.com",
+                    "mode": "list",
+                    "cachedResultName": "hadi.ch.2003@gmail.com"
+                },
+                "start": "={{ $json.start }}",
+                "end": "={{ $json.end }}",
+                "additionalFields": {
+                    "attendees": [
+                        "={{ $json.attendees[0].email }}"
+                    ],
+                    "conferenceDataUi": {
+                        "conferenceDataValues": {
+                            "conferenceSolution": "hangoutsMeet"
+                        }
+                    },
+                    "description": "={{ $json.description }}",
+                    "summary": "={{ $json.summary }}"
+                }
+            },
+            "type": "n8n-nodes-base.googleCalendar",
+            "typeVersion": 1.3,
+            "position": [
+                560,
+                288
+            ],
+            "id": "1e10d39c-2024-4b11-b5b3-7b3a6d929633",
+            "name": "Create an event"
+        },
+        {
+            "parameters": {
+                "jsCode": "// Build Event (Function node) - robust payload for Google Calendar\n\n// Config\nconst startDelayMinutes = 15; // meeting starts in X minutes\nconst durationMinutes = 30;\nconst tz = \"Asia/Beirut\"; // change if needed\n\nconst now = new Date();\nconst startDate = new Date(now.getTime() + startDelayMinutes * 60 * 1000);\nconst endDate = new Date(startDate.getTime() + durationMinutes * 60 * 1000);\n\nfunction toRFC3339(dt) {\n  const pad = (n) => String(n).padStart(2, '0');\n  return `${dt.getFullYear()}-${pad(dt.getMonth()+1)}-${pad(dt.getDate())}T${pad(dt.getHours())}:${pad(dt.getMinutes())}:${pad(dt.getSeconds())}`;\n}\n\nfunction randomId(length = 8) {\n  const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';\n  let result = '';\n  for (let i = 0; i < length; i++) {\n    result += chars.charAt(Math.floor(Math.random() * chars.length));\n  }\n  return result;\n}\n\n// Safe extraction: prefer JSON body, fallback to query params\nconst input = $input.first().json || {};\nconst body = input.body || {};                 // when original webhook POST -> body object\nconst q = input.query || {};                   // when webhook click -> query params\n\n// normalize fields (try body fields first, then query params)\nconst ticketId    = body.ticketId || q.ticket_id || q.ticket || 'Unknown-Ticket';\nconst fullName    = body.userInfo?.fullName || q.fullname || q.full_name || 'Requester';\nconst email       = body.userInfo?.email || q.email || '';\nconst title       = body.ticketDetails?.title || q.title || q.t || 'Support meeting';\nconst description = body.ticketDetails?.description || q.description || q.desc || '';\n\n// Build summary/description\nconst summary = `Support: ${title} — ${ticketId}`;\nconst desc = `Ticket ID: ${ticketId}\nRequester: ${fullName} <${email}>\n\n${description}`;\n\n// attendees: only include email if present\nconst attendees = [];\nif (email) attendees.push({ email });\n\n// generate requestId\nconst requestId = `n8n-${randomId()}`;\n\nreturn [{\n  json: {\n    fullName,\n    ticketId,\n    summary,\n    description: desc,\n    start: {\n      dateTime: toRFC3339(startDate),\n      timeZone: tz\n    },\n    end: {\n      dateTime: toRFC3339(endDate),\n      timeZone: tz\n    },\n    attendees,\n    conferenceData: {\n      createRequest: {\n        requestId\n      }\n    }\n  }\n}];\n"
+            },
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                336,
+                288
+            ],
+            "id": "c9b12369-8db3-4f9d-9ba5-b20b8a7faa05",
+            "name": "Code in JavaScript"
+        },
+        {
+            "parameters": {
+                "sendTo": "={{ $json.attendees[0].email }}",
+                "subject": "={{ $('Code in JavaScript').item.json.summary }}",
+                "emailType": "text",
+                "message": "=Dear {{ $('Code in JavaScript').item.json.fullName }},\nwe are contacting you regarding the emergent ticket \"{{ $('Code in JavaScript').item.json.ticketId}}\" you created, Kindly find below the meeting link where our support team will help you to solve it.\nDate start: {{ $json.start.dateTime }}\nthank you.\n\n{{ $json.htmlLink }}",
+                "options": {}
+            },
+            "type": "n8n-nodes-base.gmail",
+            "typeVersion": 2.1,
+            "position": [
+                768,
+                288
+            ],
+            "id": "e7e9d722-297f-48d2-bfd7-ef383fe65701",
+            "name": "Send a message1",
+            "webhookId": "5a730b6b-13c6-4897-bea9-d021d782a29a"
+        },
+        {
+            "parameters": {
+                "jsCode": "// Get the assistant message content\nconst content = $input.first().json.message.content;\n\n// Extract subject using regex\nconst subjectMatch = content.match(/^Subject:\\s*(.+)$/m);\nconst subject = subjectMatch ? subjectMatch[1].trim() : \"\";\n\n// Extract body (everything after the subject line)\nconst body = content.replace(/^Subject:\\s*.+\n*/m, \"\").trim();\n\nreturn [\n  {\n    json: {\n      subject,\n      body\n    }\n  }\n];"
+            },
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                720,
+                -240
+            ],
+            "id": "f3d0b039-dd95-4c74-8738-149761c3021e",
+            "name": "Code in JavaScript1"
+        },
+        {
+            "parameters": {
+                "modelId": {
+                    "__rl": true,
+                    "value": "chatgpt-4o-latest",
+                    "mode": "list",
+                    "cachedResultName": "CHATGPT-4O-LATEST"
+                },
+                "messages": {
+                    "values": [
+                        {
+                            "content": "=i received this message from the customer support portal,\ntitle: {{ $('Webhook').item.json.body.ticketDetails.title }}\nDescription:{{ $('Webhook').item.json.body.ticketDetails.description }}\nfullname:{{ $('Webhook').item.json.body.userInfo.fullName }}\nemail:{{ $('Webhook').item.json.body.userInfo.email }}\nPlease write an email that provide a solution to this message for the user to test.\ndon't make it long.\nour contact info are:\nhalytech.info@gmail.com\nhalytech.customersupport@gmail.com"
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "type": "@n8n/n8n-nodes-langchain.openAi",
+            "typeVersion": 1.8,
+            "position": [
+                320,
+                32
+            ],
+            "id": "06643fa7-8109-426c-97ec-68cf2581b7a7",
+            "name": "Message a model1"
+        },
+        {
+            "parameters": {
+                "sendTo": "hadi.ch.2003@gmail.com",
+                "subject": "={{ $json.subject }}",
+                "message": "=<p>Hello,</p>\n\n<!-- Convert newlines to <br/> using a JS expression -->\n<div style=\"white-space:pre-wrap;\">{{$json.body}}</div>\n\n<p>Please let us know if this fixed the issue:</p>\n\n<table role=\"presentation\" cellpadding=\"0\" cellspacing=\"0\" style=\"margin-top:16px;\">\n  <tr>\n    <td style=\"padding-right:8px;\">\n      <a href=\"http://localhost:5678/webhook/ticket-response-confirm?action=confirm\n      &ticket_id= {{ $('Webhook').item.json.body.ticketId }}\n      &fullname={{ $('Webhook').item.json.body.userInfo.fullName }}\n      &email={{ $('Webhook').item.json.body.userInfo.email }}\n      &title = {{ $('Webhook').item.json.body.ticketDetails.title }}\n      &description = {{ $('Webhook').item.json.body.ticketDetails.description }}\"\n         style=\"display:inline-block;padding:12px 20px;border-radius:6px;text-decoration:none;font-weight:600;background:#28a745;color:white;\">\n        ✅ Yes — Solved\n      </a>\n    </td>\n    <td>\n      <a href=\"http://localhost:5678/webhook/ticket-response-decline?action=decline\n      &ticket_id= {{ $('Webhook').item.json.body.ticketId }}\n      &fullname={{ $('Webhook').item.json.body.userInfo.fullName }}\n      &email={{ $('Webhook').item.json.body.userInfo.email }}\n      &title = {{ $('Webhook').item.json.body.ticketDetails.title }}\n      &description = {{ $('Webhook').item.json.body.ticketDetails.description }}\"\n         style=\"display:inline-block;padding:12px 20px;border-radius:6px;text-decoration:none;font-weight:600;background:#dc3545;color:white;\">\n        ❌ No — Not solved\n      </a>\n    </td>\n  </tr>\n</table>\n\n<p>If you prefer, you can also reply to this email.</p>\n\n<p>Regards,<br/>Support Team</p>\n",
+                "options": {}
+            },
+            "type": "n8n-nodes-base.gmail",
+            "typeVersion": 2.1,
+            "position": [
+                832,
+                32
+            ],
+            "id": "9b3b7c60-ecaf-4064-80b9-29b114c2e5d4",
+            "name": "Send a message2",
+            "webhookId": "5a730b6b-13c6-4897-bea9-d021d782a29a"
+        },
+        {
+            "parameters": {
+                "jsCode": "// Get the assistant message content\nconst content = $input.first().json.message.content;\n\n// Extract subject using regex\nconst subjectMatch = content.match(/^Subject:\\s*(.+)$/m);\nconst subject = subjectMatch ? subjectMatch[1].trim() : \"\";\n\n// Extract body (everything after the subject line)\nconst body = content.replace(/^Subject:\\s*.+\n*/m, \"\").trim();\n\nreturn [\n  {\n    json: {\n      subject,\n      body\n    }\n  }\n];"
+            },
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                640,
+                32
+            ],
+            "id": "9d8f7b82-e963-426b-8172-0683358b4899",
+            "name": "Code in JavaScript2"
+        },
+        {
+            "parameters": {
+                "path": "ticket-response-decline",
+                "options": {}
+            },
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 2.1,
+            "position": [
+                -240,
+                480
+            ],
+            "id": "4752faac-1f40-465c-9d00-17c27b1af125",
+            "name": "Decline",
+            "webhookId": "72a07922-0154-4fd3-b149-3960b4b8183e"
+        },
+        {
+            "parameters": {
+                "path": "ticket-response-confirm",
+                "options": {}
+            },
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 2.1,
+            "position": [
+                -240,
+                704
+            ],
+            "id": "420e7036-f495-4379-8cfe-5d5543962b04",
+            "name": "Confirm",
+            "webhookId": "3d932e01-0185-4101-aec1-12540fb9779f"
+        }
+    ],
+    "pinData": {},
+    "connections": {
+        "Webhook": {
+            "main": [
+                [
+                    {
+                        "node": "Switch",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Message a model": {
+            "main": [
+                [
+                    {
+                        "node": "Code in JavaScript1",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Send a message": {
+            "main": [
+                []
+            ]
+        },
+        "Switch": {
+            "main": [
+                [
+                    {
+                        "node": "Message a model",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Message a model1",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Code in JavaScript",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Create an event": {
+            "main": [
+                [
+                    {
+                        "node": "Send a message1",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Code in JavaScript": {
+            "main": [
+                [
+                    {
+                        "node": "Create an event",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Code in JavaScript1": {
+            "main": [
+                [
+                    {
+                        "node": "Send a message",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Message a model1": {
+            "main": [
+                [
+                    {
+                        "node": "Code in JavaScript2",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Code in JavaScript2": {
+            "main": [
+                [
+                    {
+                        "node": "Send a message2",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Decline": {
+            "main": [
+                [
+                    {
+                        "node": "Code in JavaScript",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    },
+    "active": false,
+    "settings": {
+        "executionOrder": "v1"
+    },
+    "versionId": "3b452990-c229-4d13-a3fa-11b25ee2b616",
+    "meta": {
+        "templateCredsSetupCompleted": true,
+        "instanceId": "72921dff8e5c7d14f6fe8dfb6fd0bb8a131322f77057dfabac1180b3d24e9caf"
+    },
+    "id": "6OWUICylXCno2vpb",
+    "tags": []
+}
