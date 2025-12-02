@@ -48,8 +48,23 @@ graph TD
     D --> E[Retrieve Relevant Context]
     E --> F[AI Response<br/>RAG Pipeline]
 ```
+### Latest Addition: GraphRAG
 
----
+The system has been extended with a graph-enhanced RAG architecture to improve retrieval accuracy and reduce hallucinations. Instead of relying solely on vector similarity, uploaded documents are parsed into structured entities and relationships that form a domain-specific Knowledge Graph. This allows the assistant to understand how concepts connect across your marketing materials, leading to more precise and context-aware answers. 
+```mermaid
+graph TD
+    A[Documents] --> B[Entity Extraction]
+    B --> C[Knowledge Graph<br/>Nodes + Edges]
+    C --> D[Graph-Aware Retrieval]
+    D --> E[Combine with<br/>Vector Search]
+    E --> F[Context Assembly]
+    F --> G[Final Answer<br/>GraphRAG Pipeline]
+
+
+```
+
+This hybrid approach strengthens the pipeline by integrating graph reasoning with traditional vector-based retrieval. Queries leverage both semantic similarity and graph structure, enabling the system to surface information that is not only relevant but also relationally accurate. The result is a more reliable assistant that can handle complex, multi-step questions, maintain consistency across related documents, and provide answers grounded in the real relationships present in your data
+
 
 ## Why It Matters
 
