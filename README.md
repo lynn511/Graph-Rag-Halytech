@@ -67,7 +67,7 @@ graph TD
 4. Run the application:
 ```bash
    # Terminal 1: Backend
-   cd backend && uvicorn main:app --reload
+   cd backend && uvicorn app:app --reload
    
    # Terminal 2: Frontend
    cd frontend && npm run dev
