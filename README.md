@@ -9,7 +9,7 @@ An AI assistant that turns your marketing documents into a fast, searchable know
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/Hadicheayto/ai-marketing-project
+git clone https://github.com/lynn511/Graph-Rag-Halytech
 ```
 
 2. Install backend dependencies:
